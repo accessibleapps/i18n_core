@@ -1,11 +1,13 @@
 from logging import getLogger
 logger = getLogger('i18n_core')
 
+import __builtin__
 import ctypes
 import gettext
 import locale
 import platform
 import os
+import speaklater
 
 __version__ = 0.1
 __author__ = 'Christopher Toth <q@q-continuum.net>'
@@ -20,6 +22,11 @@ def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
  except IOError:
   translation = gettext.translation(domain, fallback=True)
  translation.install(unicode=True)
+ lazy_gettext = speaklater.make_lazy_gettext(lambda x: translation.ugettext(x))
+ lazy_ungettext = speaklater.make_lazy_gettext(translation.ungettext)
+ setattr(__builtin__, 'lazy_gettext', lazy_gettext)
+ setattr(__builtin__, 'lazy_ungettext', lazy_ungettext)
+ setattr(__builtin__, '__', lazy_gettext)
  set_locale(locale_id)
  if use_gui:
   import gui
@@ -61,7 +68,7 @@ def get_system_locale():
   return locale.windows_locale[LCID]
  if '__CF_USER_TEXT_ENCODING' in os.environ:
   lang_code = os.environ['__CF_USER_TEXT_ENCODING'].split( ':', 1 )[1]
-  current_locale = mac_locales.get( lang_code)
+  current_locale = self.mac_locales.get( lang_code)
   if current_locale:
    return current_locale
  if 'LC_ALL' in os.environ:
