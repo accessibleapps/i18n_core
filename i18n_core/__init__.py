@@ -62,13 +62,18 @@ def find_windows_LCID(locale_id):
    LCID=0
  return LCID
 
+mac_locales = {
+ '0:0':  'en_GB.utf-8',
+ '0:3':  'de_DE.utf-8',
+}
+
 def get_system_locale():
  if platform.system() == 'Windows':
   LCID = ctypes.windll.kernel32.GetUserDefaultUILanguage()
   return locale.windows_locale[LCID]
  if '__CF_USER_TEXT_ENCODING' in os.environ:
   lang_code = os.environ['__CF_USER_TEXT_ENCODING'].split( ':', 1 )[1]
-  current_locale = self.mac_locales.get( lang_code)
+  current_locale = mac_locales.get( lang_code)
   if current_locale:
    return current_locale
  if 'LC_ALL' in os.environ:
