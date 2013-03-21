@@ -21,16 +21,22 @@ def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
   logger.debug("Initialized gettext translation for locale %s" % locale_id)
  except IOError:
   translation = gettext.translation(domain, fallback=True)
- translation.install(unicode=True)
- lazy_gettext = speaklater.make_lazy_gettext(lambda x: translation.ugettext(x))
- lazy_ungettext = speaklater.make_lazy_gettext(translation.ungettext)
- setattr(__builtin__, 'lazy_gettext', lazy_gettext)
- setattr(__builtin__, 'lazy_ungettext', lazy_ungettext)
- setattr(__builtin__, '__', lazy_gettext)
+ install_translation(translation)
  set_locale(locale_id)
  if use_gui:
   import gui
   gui.set_wx_locale(locale_path, domain, locale_id)
+
+def install_translation(translation=None):
+ if translation is None:
+  translation = gettext.translation('', fallback=True)
+  logger.debug("Creating fallback translation")
+ translation.install(unicode=True)
+ lgettext = lambda s: speaklater.make_lazy_string(translation.ugettext, s)
+ lngettext = lambda x, y, z, **k: speaklater.make_lazy_string(translation.ungettext, x, y, z, **k)
+ setattr(__builtin__, 'lgettext', lgettext)
+ setattr(__builtin__, 'lngettext', lngettext)
+ setattr(__builtin__, '__', lgettext)
 
 def set_locale(locale_id):
  try:
