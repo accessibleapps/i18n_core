@@ -27,16 +27,17 @@ def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
   import gui
   gui.set_wx_locale(locale_path, domain, locale_id)
 
-def install_translation(translation=None):
+def install_translation(translation=None, module=__builtin__):
  if translation is None:
   translation = gettext.translation('', fallback=True)
   logger.debug("Creating fallback translation")
  translation.install(unicode=True)
  lgettext = lambda s: speaklater.make_lazy_string(translation.ugettext, s)
  lngettext = lambda x, y, z, **k: speaklater.make_lazy_string(translation.ungettext, x, y, z, **k)
- setattr(__builtin__, 'lgettext', lgettext)
- setattr(__builtin__, 'lngettext', lngettext)
- setattr(__builtin__, '__', lgettext)
+ setattr(module, 'lgettext', lgettext)
+ setattr(module, 'lngettext', lngettext)
+ setattr(module, 'ngettext', translation.ngettext)
+ setattr(module, '__', lgettext)
 
 def set_locale(locale_id):
  try:
