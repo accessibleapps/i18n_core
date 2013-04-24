@@ -7,7 +7,7 @@ import gettext
 import locale
 import platform
 import os
-import speaklater
+
 
 __version__ = 0.1
 __author__ = 'Christopher Toth <q@q-continuum.net>'
@@ -28,6 +28,7 @@ def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
   gui.set_wx_locale(locale_path, domain, locale_id)
 
 def install_translation(translation=None, module=__builtin__):
+ import speaklater
  if translation is None:
   translation = gettext.translation('', fallback=True)
   logger.debug("Creating fallback translation")
