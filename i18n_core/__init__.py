@@ -11,9 +11,10 @@ import gettext
 import locale
 import platform
 import os
+import sys
 
 
-__version__ = 0.1
+__version__ = 0.11
 __author__ = 'Christopher Toth <q@q-continuum.net>'
 __doc__ = """Internationalization and localization setup and support utilities."""
 
