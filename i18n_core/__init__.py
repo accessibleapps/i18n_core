@@ -1,7 +1,11 @@
 from logging import getLogger
 logger = getLogger('i18n_core')
 
-import __builtin__
+try:
+ import __builtin__ as builtins
+except ImportError:
+ import builtins
+
 import ctypes
 import gettext
 import locale
@@ -27,7 +31,7 @@ def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
   import gui
   gui.set_wx_locale(locale_path, domain, locale_id)
 
-def install_translation(translation=None, module=__builtin__):
+def install_translation(translation=None, module=builtins):
  import speaklater
  if translation is None:
   translation = gettext.translation('', fallback=True)
