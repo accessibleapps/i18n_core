@@ -36,7 +36,10 @@ def install_translation(translation=None, module=builtins):
  if translation is None:
   translation = gettext.translation('', fallback=True)
   logger.debug("Creating fallback translation")
- translation.install(unicode=True)
+ kw = {}
+ if sys.version_info[0] < 3:
+  kw['unicode'] = True
+ translation.install(**kw)
  lgettext = lambda s: speaklater.make_lazy_string(translation.ugettext, s)
  lngettext = lambda x, y, z, **k: speaklater.make_lazy_string(translation.ungettext, x, y, z, **k)
  setattr(module, 'lgettext', lgettext)
