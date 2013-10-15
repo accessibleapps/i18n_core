@@ -21,16 +21,27 @@ __doc__ = """Internationalization and localization setup and support utilities."
 DEFAULT_LOCALE = 'en_US'
 
 def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
- try:
-  translation = gettext.translation(domain, localedir=locale_path, languages=[locale_id])
-  logger.debug("Initialized gettext translation for locale %s" % locale_id)
- except IOError:
-  translation = gettext.translation(domain, fallback=True)
+ translation = find_translation(domain, locale_path, locale_id)
+ if translation is None:
+  translation = default_translation(domain)
+  logger.debug("Falling back to default translation")
  install_translation(translation)
  set_locale(locale_id)
  if use_gui:
   import gui
   gui.set_wx_locale(locale_path, domain, locale_id)
+
+def find_translation(domain, locale_path, locale_id):
+ try:
+  translation = gettext.translation(domain, localedir=locale_path, languages=[locale_id])
+  logger.debug("Initialized gettext translation for locale %s" % locale_id)
+ except IOError:
+  translation = None
+ return translation
+
+def default_translation(domain):
+ return gettext.translation(domain, fallback=True)
+
 
 def install_translation(translation=None, module=builtins):
  import speaklater
