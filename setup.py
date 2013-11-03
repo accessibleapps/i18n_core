@@ -7,6 +7,7 @@ setup(
  description = __doc__,
  packages = ['i18n_core'],
  install_requires = [
+  'platform_utils',
   'speaklater',
  ],
  classifiers = [
