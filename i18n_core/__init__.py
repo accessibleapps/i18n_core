@@ -8,28 +8,54 @@ except ImportError:
 
 import ctypes
 import gettext
+import imp
+import inspect
 import locale
 import platform
 import os
 import sys
 
+from platform_utils import paths
 
-__version__ = 0.11
+
+__version__ = 0.2
 __author__ = 'Christopher Toth <q@q-continuum.net>'
 __doc__ = """Internationalization and localization setup and support utilities."""
 
 DEFAULT_LOCALE = 'en_US'
+application_locale = None
+application_locale_path = None
 
 def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
+ global application_locale, application_locale_path
  translation = find_translation(domain, locale_path, locale_id)
  if translation is None:
   translation = default_translation(domain)
-  logger.debug("Falling back to default translation")
+  logger.debug("Falling back to default translation for domain %s" % domain)
  install_translation(translation)
  set_locale(locale_id)
  if use_gui:
   import gui
   gui.set_wx_locale(locale_path, domain, locale_id)
+ application_locale = locale_id
+ application_locale_path = locale_path
+
+
+def install_module_translation(module_domain, locale_path=None, locale=None, module=None):
+ if module is None:
+  module = get_caller_module()
+ if locale_path is None:
+  locale_path = get_locale_path(module)
+ if locale is None:
+  locale = application_locale
+ translation = find_translation(module_domain, locale_path, locale)
+ if translation is None:
+  translation = default_translation(module_domain)
+  logger.debug("Falling back to default translation for domain %s" % module_domain)
+ install_translation(translation, module=module)
+
+def get_caller_module():
+ return inspect.getmodule(inspect.stack()[2][0])
 
 def find_translation(domain, locale_path, locale_id):
  try:
@@ -42,7 +68,6 @@ def find_translation(domain, locale_path, locale_id):
 def default_translation(domain):
  return gettext.translation(domain, fallback=True)
 
-
 def install_translation(translation=None, module=builtins):
  import speaklater
  if translation is None:
@@ -54,10 +79,10 @@ def install_translation(translation=None, module=builtins):
  translation.install(**kw)
  lgettext = lambda s: speaklater.make_lazy_string(translation.ugettext, s)
  lngettext = lambda x, y, z, **k: speaklater.make_lazy_string(translation.ungettext, x, y, z, **k)
- setattr(module, 'lgettext', lgettext)
- setattr(module, 'lngettext', lngettext)
- setattr(module, 'ngettext', translation.ngettext)
- setattr(module, '__', lgettext)
+ module.lgettext = lgettext
+ module.lngettext = lngettext
+ module.ngettext = translation.ngettext
+ module.__ = lgettext
 
 def set_locale(locale_id):
  try:
@@ -125,3 +150,9 @@ def detect_available_languages(locale_path, domain):
 def find_locale_by_name(locale_name):
  #Not currently working
  return locale_name
+
+def get_locale_path(module=None):
+ if not paths.is_frozen():
+  return os.path.join(os.path.split(module.__file__)[0], 'locale')
+ return application_locale_path
+
