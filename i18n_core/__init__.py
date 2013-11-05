@@ -26,7 +26,7 @@ DEFAULT_LOCALE = 'en_US'
 application_locale = None
 application_locale_path = None
 
-def prepare_internationalization(locale_path, domain, locale_id, use_gui=False):
+def prepare_internationalization(domain, locale_path, locale_id, use_gui=False):
  global application_locale, application_locale_path
  translation = find_translation(domain, locale_path, locale_id)
  if translation is None:
@@ -58,6 +58,7 @@ def get_caller_module():
  return inspect.getmodule(inspect.stack()[2][0])
 
 def find_translation(domain, locale_path, locale_id):
+ print domain, locale_path, locale_id
  try:
   translation = gettext.translation(domain, localedir=locale_path, languages=[locale_id])
   logger.debug("Initialized gettext translation for locale %s" % locale_id)
