@@ -25,6 +25,7 @@ __doc__ = """Internationalization and localization setup and support utilities."
 DEFAULT_LOCALE = 'en_US'
 application_locale = None
 application_locale_path = None
+installed_translations = []
 
 def prepare_internationalization(domain, locale_path, locale_id, use_gui=False):
  global application_locale, application_locale_path
@@ -70,6 +71,7 @@ def default_translation(domain):
  return gettext.translation(domain, fallback=True)
 
 def install_translation(translation=None, module=builtins):
+ global installed_translations
  import speaklater
  if translation is None:
   translation = gettext.translation('', fallback=True)
@@ -78,8 +80,9 @@ def install_translation(translation=None, module=builtins):
  if sys.version_info[0] < 3:
   kw['unicode'] = True
  translation.install(**kw)
- lgettext = lambda s: speaklater.make_lazy_string(translation.ugettext, s)
- lngettext = lambda x, y, z, **k: speaklater.make_lazy_string(translation.ungettext, x, y, z, **k)
+ installed_translations.append(translation)
+ lgettext = speaklater.make_lazy_gettext(lambda: installed_translations[-1].ugettext)
+ lngettext = speaklater.make_lazy_gettext(lambda: translation.ungettext)
  module.lgettext = lgettext
  module.lngettext = lngettext
  module.ngettext = translation.ngettext
