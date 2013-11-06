@@ -81,7 +81,9 @@ def install_translation(translation=None, module=builtins):
   kw['unicode'] = True
  translation.install(**kw)
  installed_translations.append(translation)
- lgettext = speaklater.make_lazy_gettext(lambda: installed_translations[-1].ugettext)
+ def f(*args, **kwargs):
+  return installed_translations[-1].ugettext(*args, **kwargs)
+ lgettext = speaklater.make_lazy_gettext(lambda: f)
  lngettext = speaklater.make_lazy_gettext(lambda: translation.ungettext)
  module.lgettext = lgettext
  module.lngettext = lngettext
