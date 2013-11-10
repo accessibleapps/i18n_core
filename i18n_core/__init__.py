@@ -27,7 +27,7 @@ application_locale = None
 application_locale_path = None
 installed_translations = []
 
-def prepare_internationalization(domain, locale_path, locale_id, use_gui=False):
+def prepare_internationalization(domain, locale_path, locale_id):
  global application_locale, application_locale_path
  translation = find_translation(domain, locale_path, locale_id)
  if translation is None:
@@ -35,9 +35,6 @@ def prepare_internationalization(domain, locale_path, locale_id, use_gui=False):
   logger.debug("Falling back to default translation for domain %s" % domain)
  install_translation(translation)
  set_locale(locale_id)
- if use_gui:
-  import gui
-  gui.set_wx_locale(locale_path, domain, locale_id)
  application_locale = locale_id
  application_locale_path = locale_path
 
@@ -59,12 +56,17 @@ def get_caller_module():
  return inspect.getmodule(inspect.stack()[2][0])
 
 def find_translation(domain, locale_path, locale_id):
- print domain, locale_path, locale_id
  try:
   translation = gettext.translation(domain, localedir=locale_path, languages=[locale_id])
-  logger.debug("Initialized gettext translation for locale %s" % locale_id)
+  logger.info("Initialized gettext translation for locale %s" % locale_id)
  except IOError:
-  translation = None
+  if '_' in locale_id:
+   locale_id = locale_id.split('_')[0]
+   try:
+    translation = gettext.translation(domain, localedir=locale_path, languages=[locale_id])
+    logger.info("Initialized gettext translation for locale %s" % locale_id)
+   except IOError:
+    translation = None
  return translation
 
 def default_translation(domain):
