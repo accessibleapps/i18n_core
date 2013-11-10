@@ -99,6 +99,7 @@ def set_locale(locale_id):
   except locale.Error:
    locale.setlocale(locale.LC_ALL, locale_id.split('_')[0])
  except locale.Error:
+  logger.warn("Unable to set locale, setting to default")
   locale.setlocale(locale.LC_ALL, '')
  #Set the windows locale for this thread to this locale.
  if platform.system() == 'Windows':
