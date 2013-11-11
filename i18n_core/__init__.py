@@ -29,6 +29,8 @@ installed_translations = []
 
 def prepare_internationalization(domain, locale_path, locale_id):
  global application_locale, application_locale_path
+ locale._parse_localename = _parse_localename
+ logger.debug("Monkeypatched the locale module with an improved locale parser.")
  translation = find_translation(domain, locale_path, locale_id)
  if translation is None:
   translation = default_translation(domain)
@@ -164,4 +166,35 @@ def get_locale_path(module=None):
  if not paths.is_frozen():
   return os.path.join(os.path.split(module.__file__)[0], 'locale')
  return application_locale_path
+
+def _parse_localename(localename):
+
+ """ Parses the locale code for localename and returns the
+  result as tuple (language code, encoding).
+
+  The localename is normalized and passed through the locale
+  alias engine. A ValueError is raised in case the locale name
+  cannot be parsed.
+
+  The language code corresponds to RFC 1766.  code and encoding
+  can be None in case the values cannot be determined or are
+  unknown to this implementation.
+
+  This implementation fixes an issue with the implementation available in the standard library which will break on some Windows locale names which contain .
+ """
+ code = locale.normalize(localename)
+ if '@' in code:
+  # Deal with locale modifiers
+  code, modifier = code.split('@')
+  if modifier == 'euro' and '.' not in code:
+   # Assume Latin-9 for @euro locales. This is bogus,
+   # since some systems may use other encodings for these
+   # locales. Also, we ignore other modifiers.
+   return code, 'iso-8859-15'
+
+ if '.' in code:
+  return tuple(code.rsplit('.', 1)[:2])
+ elif code == 'C':
+  return None, None
+ raise ValueError, 'unknown locale: %s' % localename
 
