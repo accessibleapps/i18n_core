@@ -198,3 +198,8 @@ def _parse_localename(localename):
   return None, None
  raise ValueError, 'unknown locale: %s' % localename
 
+def locale_decode(s):
+ encoding = locale.getlocale()[1]
+ if encoding is not None:
+  s = s.decode(encoding)
+ return s
