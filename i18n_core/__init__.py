@@ -95,12 +95,12 @@ def install_translation(translation=None, module=builtins):
 def set_locale(locale_id):
  try:
   try:
-   locale.setlocale(locale.LC_ALL, locale_id)
+   current_locale = locale.setlocale(locale.LC_ALL, locale_id)
   except locale.Error:
-   locale.setlocale(locale.LC_ALL, locale_id.split('_')[0])
+   current_locale = locale.setlocale(locale.LC_ALL, locale_id.split('_')[0])
  except locale.Error:
-  logger.warn("Unable to set locale, setting to default")
-  locale.setlocale(locale.LC_ALL, '')
+  current_locale = locale.setlocale(locale.LC_ALL, '')
+  logger.warning("Set to default locale %s" % current_locale)
  #Set the windows locale for this thread to this locale.
  if platform.system() == 'Windows':
   LCID = find_windows_LCID(locale_id)
