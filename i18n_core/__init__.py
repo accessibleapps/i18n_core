@@ -34,7 +34,7 @@ def prepare_internationalization(domain, locale_path, locale_id):
  translation = find_translation(domain, locale_path, locale_id)
  if translation is None:
   translation = default_translation(domain)
-  logger.debug("Falling back to default translation for domain %s" % domain)
+  logger.info("Falling back to default translation for domain %s" % domain)
  install_translation(translation)
  set_locale(locale_id)
  application_locale = locale_id
@@ -51,8 +51,8 @@ def install_module_translation(module_domain, locale_path=None, locale=None, mod
  translation = find_translation(module_domain, locale_path, locale)
  if translation is None:
   translation = default_translation(module_domain)
-  logger.debug("Falling back to default translation for domain %s" % module_domain)
- install_translation(translation, module=module)
+  logger.info("Falling back to default translation for domain %s" % module_domain)
+ install_translation(translation=translation, module=module)
 
 def get_caller_module():
  return inspect.getmodule(inspect.stack()[2][0])
