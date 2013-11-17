@@ -18,10 +18,6 @@ import sys
 from platform_utils import paths
 
 
-__version__ = 0.2
-__author__ = 'Christopher Toth <q@q-continuum.net>'
-__doc__ = """Internationalization and localization setup and support utilities."""
-
 DEFAULT_LOCALE = 'en_US'
 application_locale = None
 application_locale_path = None
@@ -84,9 +80,8 @@ def install_translation(translation=None, module=builtins):
  if sys.version_info[0] < 3:
   kw['unicode'] = True
  translation.install(**kw)
- installed_translations.append(translation)
  def f(*args, **kwargs):
-  return installed_translations[-1].ugettext(*args, **kwargs)
+  return translation.ugettext(*args, **kwargs)
  lgettext = speaklater.make_lazy_gettext(lambda: f)
  lngettext = speaklater.make_lazy_gettext(lambda: translation.ungettext)
  module.lgettext = lgettext

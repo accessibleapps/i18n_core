@@ -1,5 +1,9 @@
 from setuptools import setup
-from i18n_core import __author__, __doc__, __version__
+
+__version__ = 0.2
+__author__ = 'Christopher Toth <q@q-continuum.net>'
+__doc__ = """Internationalization and localization setup and support utilities."""
+
 
 setup(
  name = 'i18n_core',
