@@ -21,10 +21,10 @@ from platform_utils import paths
 DEFAULT_LOCALE = 'en_US'
 application_locale = None
 application_locale_path = None
-installed_translations = []
+current_translation = None
 
 def prepare_internationalization(domain, locale_path, locale_id):
- global application_locale, application_locale_path
+ global application_locale, application_locale_path, current_translation
  locale._parse_localename = _parse_localename
  logger.debug("Monkeypatched the locale module with an improved locale parser.")
  translation = find_translation(domain, locale_path, locale_id)
@@ -35,6 +35,7 @@ def prepare_internationalization(domain, locale_path, locale_id):
  set_locale(locale_id)
  application_locale = locale_id
  application_locale_path = locale_path
+ current_translation = translation
 
 
 def install_module_translation(module_domain, locale_path=None, locale=None, module=None):
@@ -44,6 +45,8 @@ def install_module_translation(module_domain, locale_path=None, locale=None, mod
   locale_path = get_locale_path(module)
  if locale is None:
   locale = application_locale
+ if locale is None:
+  locale = ''
  translation = find_translation(module_domain, locale_path, locale)
  if translation is None:
   translation = default_translation(module_domain)
@@ -54,6 +57,7 @@ def get_caller_module():
  return inspect.getmodule(inspect.stack()[2][0])
 
 def find_translation(domain, locale_path, locale_id):
+ translation = None
  try:
   translation = gettext.translation(domain, localedir=locale_path, languages=[locale_id])
   logger.info("Initialized gettext translation for locale %s" % locale_id)
@@ -81,9 +85,9 @@ def install_translation(translation=None, module=builtins):
   kw['unicode'] = True
  translation.install(**kw)
  def f(*args, **kwargs):
-  return translation.ugettext(*args, **kwargs)
+  return current_translation.ugettext(*args, **kwargs)
  lgettext = speaklater.make_lazy_gettext(lambda: f)
- lngettext = speaklater.make_lazy_gettext(lambda: translation.ungettext)
+ lngettext = speaklater.make_lazy_gettext(lambda: current_translation.ungettext)
  module.lgettext = lgettext
  module.lngettext = lngettext
  module.ngettext = translation.ngettext
