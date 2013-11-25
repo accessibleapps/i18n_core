@@ -23,14 +23,13 @@ def install_global_translation(domain=None, locale_id=None, locale_path=None):
  global application_locale_path
  if locale_id is None:
   locale_id = get_system_locale()
- print locale_path, locale_id, domain
  active_translation = support.Translations.load(locale_path, [locale_id], domain)
  if not isinstance(active_translation, support.Translations):
   active_translation = support.Translations()
  active_translation.install()
- active_translation.set_output_charset(locale.getpreferredencoding())
  install_translation_into_module()
  set_locale(locale_id)
+ active_translation.set_output_charset(locale.getlocale()[1])
  application_locale_path = locale_path
  return locale_id
 
@@ -47,7 +46,7 @@ def install_translation_into_module(module=__builtin__):
   return support.LazyProxy(lambda: active_translation.ugettext(string))
  module._ = active_translation.gettext
  module.__ = lazy_gettext
-
+ module.ngettext = lambda s1, s2, n: active_translation.ungettext(s1, s2, n)
 mac_locales = {
  '0:0':  'en_GB.utf-8',
  '0:3':  'de_DE.utf-8',
@@ -66,7 +65,6 @@ def get_system_locale():
   return _locale.normalize(os.environ['LC_ALL'])
   current_locale = locale.getdefaultlocale()[0]
  if current_locale is None:
-  logger.warning("Unable to detect the system's default current_locale. Defaulting to %s" % DEFAULT_LOCALE)
   current_locale = DEFAULT_LOCALE
  return current_locale
 
