@@ -11,7 +11,7 @@ setup(
  description = __doc__,
  packages = ['i18n_core'],
  install_requires = [
- ''babel',
+  'babel',
   'platform_utils',
  ],
  classifiers = [
