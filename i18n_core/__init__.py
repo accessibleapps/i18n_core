@@ -35,6 +35,8 @@ def install_global_translation(domain=None, locale_id=None, locale_path=None):
  return locale_id
 
 def install_module_translation(domain=None, locale_id=None, locale_path=None, module=None):
+ if active_translation is None:
+  return
  if locale_path is None:
   locale_path = get_locale_path(module)
  if locale_id is None:
