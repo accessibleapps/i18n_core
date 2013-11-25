@@ -1,5 +1,6 @@
-from logging import getLogger
+from logging import getLogger, NullHandler
 logger = getLogger('i18n_core')
+logger.addHandler(NullHandler())
 
 import __builtin__
 import ctypes
@@ -44,9 +45,10 @@ def install_module_translation(domain=None, locale_id=None, locale_path=None, mo
 def install_translation_into_module(module=__builtin__):
  def lazy_gettext(string):
   return support.LazyProxy(lambda: active_translation.ugettext(string))
- module._ = active_translation.gettext
+ module._ = active_translation.ugettext
  module.__ = lazy_gettext
  module.ngettext = lambda s1, s2, n: active_translation.ungettext(s1, s2, n)
+
 mac_locales = {
  '0:0':  'en_GB.utf-8',
  '0:3':  'de_DE.utf-8',
