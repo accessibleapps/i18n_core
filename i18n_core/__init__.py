@@ -7,6 +7,7 @@ import ctypes
 import locale
 import os
 import platform
+import sys
 
 
 from platform_utils import paths
@@ -20,7 +21,7 @@ from babel import support
 DEFAULT_LOCALE = 'en_US'
 
 
-active_translation = None
+active_translation = support.Translations()
 application_locale_path = None
 
 def install_global_translation(domain=None, locale_id=None, locale_path=None):
@@ -28,7 +29,7 @@ def install_global_translation(domain=None, locale_id=None, locale_path=None):
  global application_locale_path
  if locale_id is None:
   locale_id = get_system_locale()
- active_translation = support.Translations.load(locale_path, [locale_id], domain)
+ active_translation.merge(support.Translations.load(locale_path, [locale_id], domain))
  if not isinstance(active_translation, support.Translations):
   active_translation = support.Translations()
  active_translation.install()
@@ -39,6 +40,8 @@ def install_global_translation(domain=None, locale_id=None, locale_path=None):
  return locale_id
 
 def install_module_translation(domain=None, locale_id=None, locale_path=None, module=None):
+ if isinstance(module, basestring):
+  module = sys.modules[module]
  if active_translation is None:
   return
  if locale_path is None:
@@ -47,6 +50,7 @@ def install_module_translation(domain=None, locale_id=None, locale_path=None, mo
   locale_id = get_system_locale()
  module_translation = support.Translations.load(locale_path, [locale_id], domain)
  active_translation.merge(module_translation)
+ install_translation_into_module(module)
 
 def install_translation_into_module(module=__builtin__):
  def lazy_gettext(string):
