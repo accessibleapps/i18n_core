@@ -19,6 +19,9 @@ if paths.is_frozen():
  with open(os.path.join(paths.embedded_data_path(), "babel", "global.dat"), 'rb') as fp:
   babel.core._global_data = pickle.load(fp)
 from babel import support
+import babel.localedata
+if paths.is_frozen():
+ babel.localedata._dirname = os.path.join(paths.embedded_data_path(), 'localedata')
 
 DEFAULT_LOCALE = 'en_US'
 
