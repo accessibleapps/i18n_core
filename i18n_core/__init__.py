@@ -88,7 +88,7 @@ def get_system_locale():
 def get_locale_path(module=None):
  if not paths.is_frozen():
   return os.path.join(os.path.split(module.__file__)[0], 'locale')
- return application_locale_path
+ return os.path.join(paths.embedded_data_path(), 'locale')
 
 def locale_decode(s):
  encoding = locale.getlocale()[1]
