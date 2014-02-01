@@ -80,7 +80,7 @@ def get_system_locale():
    return current_locale
  if 'LC_ALL' in os.environ:
   return _locale.normalize(os.environ['LC_ALL'])
-  current_locale = locale.getdefaultlocale()[0]
+ current_locale = locale.getdefaultlocale()[0]
  if current_locale is None:
   current_locale = DEFAULT_LOCALE
  return current_locale
