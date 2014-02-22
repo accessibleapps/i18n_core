@@ -5,12 +5,10 @@ import i18n_core
 
 def set_wx_locale(locale_path, domain, locale_id):
  wx_lang = wx.Locale.FindLanguageInfo(locale_id)
- if wx_lang is None and '_' in locale_id:
-  locale_id = locale_id.split('_')[0]
-  wx_lang = wx.Locale.FindLanguageInfo(locale_id)
- if wx_lang is None:
-  logger.warning("Unable to find wx locale %s, falling back to default." % locale_id)
-  wx_lang = wx.Locale.FindLanguageInfo(i18n_core.DEFAULT_LOCALE)
- wx_locale = wx.Locale(wx_lang.Language)
- wx_locale.AddCatalogLookupPathPrefix(locale_path)
- wx_locale.AddCatalog(domain)
+ wx.Locale.AddCatalogLookupPathPrefix(locale_path)
+ wx_locale = wx.Locale()
+ wx_locale.AddCatalog('wxstd')
+ wx_locale.Init(wx_lang.Language)
+ return wx_locale
+
+
