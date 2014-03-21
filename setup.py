@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = 0.3
+__version__ = 0.31
 __author__ = 'Christopher Toth <q@q-continuum.net>'
 __doc__ = """Internationalization and localization setup and support utilities."""
 
