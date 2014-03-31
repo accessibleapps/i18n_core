@@ -4,6 +4,7 @@ logger.addHandler(NullHandler())
 
 import __builtin__
 import ctypes
+import datetime
 import locale
 import os
 import platform
@@ -136,3 +137,10 @@ def get_available_translations(domain, locale_path=None):
    result.append(directory)
  result.append(DEFAULT_LOCALE)
  return result
+
+def format_timestamp(timestamp):
+ dt = datetime.datetime.fromtimestamp(timestamp)
+ if dt.date() == dt.today().date():
+  return locale_decode(format(dt, '%X'))
+ return locale_decode(format(dt, '%c'))
+
