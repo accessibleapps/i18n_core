@@ -139,7 +139,9 @@ def get_available_translations(domain, locale_path=None):
  return result
 
 def format_timestamp(timestamp):
- dt = datetime.datetime.fromtimestamp(timestamp)
+ dt = timestamp
+ if not isinstance(dt, datetime.datetime):
+  dt = datetime.datetime.fromtimestamp(timestamp)
  if dt.date() == dt.today().date():
   return locale_decode(format(dt, '%X'))
  return locale_decode(format(dt, '%c'))
