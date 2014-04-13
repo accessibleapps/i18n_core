@@ -2,7 +2,10 @@ from logging import getLogger, NullHandler
 logger = getLogger('i18n_core')
 logger.addHandler(NullHandler())
 
-import __builtin__
+try:
+ import __builtin__
+except ImportError:
+ import builtins as __builtin__
 import ctypes
 import datetime
 import locale
