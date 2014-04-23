@@ -9,6 +9,9 @@ import babel.core
 def set_wx_locale(locale_path, domain, locale_id):
  locale_id = locale_id.split('.')[0]
  wx_lang = wx.Locale.FindLanguageInfo(locale_id)
+ if wx_lang is None:
+  logger.warning("No wx translation found for locale %s" % locale_id)
+  return
  wx.Locale.AddCatalogLookupPathPrefix(locale_path)
  wx_locale = wx.Locale()
  wx_locale.AddCatalog('wxstd')
