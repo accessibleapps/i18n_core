@@ -131,15 +131,19 @@ def find_windows_LCID(locale_id):
    LCID=0
  return LCID
 
+def get_available_locales(domain, locale_path=None):
+ translations = get_available_translations(domain, locale_path)
+ for translation_dir in translations:
+  yield babel.core.Locale(translation_dir)
+
+
 def get_available_translations(domain, locale_path=None):
  if locale_path is None:
   locale_path = application_locale_path
- result = []
  for directory in os.listdir(locale_path):
   if os.path.exists(os.path.join(locale_path, directory, 'lc_messages', '%s.mo' % domain)):
-   result.append(directory)
- result.append(DEFAULT_LOCALE)
- return result
+   yield directory
+ yield DEFAULT_LOCALE
 
 def format_timestamp(timestamp):
  dt = timestamp
