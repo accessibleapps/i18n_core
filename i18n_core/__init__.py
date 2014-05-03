@@ -145,7 +145,7 @@ def get_available_translations(domain, locale_path=None):
  for directory in os.listdir(locale_path):
   if os.path.exists(os.path.join(locale_path, directory, 'lc_messages', '%s.mo' % domain)):
    yield directory
- yield default_locale.split('.')[0]
+ yield DEFAULT_LOCALE
 
 def format_timestamp(timestamp):
  dt = timestamp
