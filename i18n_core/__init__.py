@@ -28,7 +28,7 @@ if paths.is_frozen():
  babel.localedata._dirname = os.path.join(paths.embedded_data_path(), 'localedata')
 
 DEFAULT_LOCALE = 'en_US'
-
+CURRENT_LOCALE = DEFAULT_LOCALE
 
 active_translation = support.Translations()
 application_locale_path = None
@@ -101,6 +101,7 @@ def locale_decode(s):
  return s
 
 def set_locale(locale_id):
+ global CURRENT_LOCALE
  try:
   try:
    current_locale = locale.setlocale(locale.LC_ALL, locale_id)
@@ -113,6 +114,7 @@ def set_locale(locale_id):
  if platform.system() == 'Windows':
   LCID = find_windows_LCID(locale_id)
   ctypes.windll.kernel32.SetThreadLocale(LCID)
+ CURRENT_LOCALE = current_locale
 
 def find_windows_LCID(locale_id):
  #Windows Vista is able to convert locale names to LCIDs
@@ -143,7 +145,7 @@ def get_available_translations(domain, locale_path=None):
  for directory in os.listdir(locale_path):
   if os.path.exists(os.path.join(locale_path, directory, 'lc_messages', '%s.mo' % domain)):
    yield directory
- yield DEFAULT_LOCALE.split('.')[0]
+ yield default_locale.split('.')[0]
 
 def format_timestamp(timestamp):
  dt = timestamp
