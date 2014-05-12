@@ -140,8 +140,11 @@ def get_available_locales(domain, locale_path=None):
   language, region = translation_dir, None
   if '_' in translation_dir:
    language, region = translation_dir.split('_')
-  yield babel.core.Locale(language, region)
-
+  try:
+   yield babel.core.Locale(language, region)
+  except babel.core.UnknownLocaleError:
+   logger.debug("Error retrieving locale for language %r, region %r" % (language, region))
+   continue
 
 def get_available_translations(domain, locale_path=None):
  if locale_path is None:
