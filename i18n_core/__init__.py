@@ -135,8 +135,12 @@ def find_windows_LCID(locale_id):
 
 def get_available_locales(domain, locale_path=None):
  translations = get_available_translations(domain, locale_path)
+
  for translation_dir in translations:
-  yield babel.core.Locale(translation_dir)
+  language, region = translation_dir, None
+  if '_' in translation_dir:
+   language, region = translation_dir.split('_')
+  yield babel.core.Locale(language, region)
 
 
 def get_available_translations(domain, locale_path=None):
