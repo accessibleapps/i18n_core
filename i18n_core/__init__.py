@@ -133,17 +133,20 @@ def find_windows_LCID(locale_id):
    LCID=0
  return LCID
 
+def locale_from_locale_id(locale_id):
+ language, region = locale_id, None
+ if '_' in locale_id:
+  language, region = locale_id.split('_')
+ return babel.core.Locale(language, region)
+
+
 def get_available_locales(domain, locale_path=None):
  translations = get_available_translations(domain, locale_path)
-
  for translation_dir in translations:
-  language, region = translation_dir, None
-  if '_' in translation_dir:
-   language, region = translation_dir.split('_')
   try:
-   yield babel.core.Locale(language, region)
+   yield locale_from_locale_id(translation_dir)
   except babel.core.UnknownLocaleError:
-   logger.debug("Error retrieving locale for language %r, region %r" % (language, region))
+   logger.warning("Error retrieving locale for language %r, region %r" % (language, region))
    continue
 
 def get_available_translations(domain, locale_path=None):
