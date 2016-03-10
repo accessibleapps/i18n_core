@@ -150,7 +150,7 @@ def get_available_locales(domain, locale_path=None):
   try:
    yield locale_from_locale_id(translation_dir)
   except babel.core.UnknownLocaleError:
-   logger.warning("Error retrieving locale for language %r, region %r" % (language, region))
+   logger.warning("Error retrieving locale for translation %r", translation_dir)
    continue
 
 def get_available_translations(domain, locale_path=None):
