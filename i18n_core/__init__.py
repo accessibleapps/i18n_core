@@ -49,7 +49,7 @@ def install_global_translation(domain=None, locale_id=None, locale_path=None):
  return locale_id
 
 def install_module_translation(domain=None, locale_id=None, locale_path=None, module=None):
- if isinstance(module, basestring):
+ if module in sys.modules:
   module = sys.modules[module]
  if active_translation is None:
   return
