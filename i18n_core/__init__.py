@@ -76,7 +76,11 @@ mac_locales = {
 def get_system_locale():
  if platform.system() == 'Windows':
   LCID = ctypes.windll.kernel32.GetUserDefaultLCID()
-  return locale.windows_locale[LCID]
+  try:
+   return locale.windows_locale[LCID]
+  except KeyError:
+   logger.error("Unable to find locale %s" % LCID)
+   return DEFAULT_LOCALE 
  if '__CF_USER_TEXT_ENCODING' in os.environ:
   lang_code = os.environ['__CF_USER_TEXT_ENCODING'].split( ':', 1 )[1]
   current_locale = mac_locales.get( lang_code)
