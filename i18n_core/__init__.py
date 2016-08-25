@@ -52,11 +52,12 @@ def install_module_translation(domain=None, locale_id=None, locale_path=None, mo
  if module in sys.modules:
   module = sys.modules[module]
  if active_translation is None:
+  logger.warning("Cannot install module translation if there is no global translation active")
   return
  if locale_path is None:
   locale_path = get_locale_path(module)
  if locale_id is None:
-  locale_id = get_system_locale()
+  locale_id = CURRENT_LOCALE
  module_translation = support.Translations.load(locale_path, [locale_id], domain)
  active_translation.merge(module_translation)
  logger.debug("Installed translation %s for domain %s into module %r" % (locale_id, domain, module))
@@ -118,7 +119,7 @@ def set_locale(locale_id):
  if platform.system() == 'Windows':
   LCID = find_windows_LCID(locale_id)
   ctypes.windll.kernel32.SetThreadLocale(LCID)
- CURRENT_LOCALE = current_locale
+ CURRENT_LOCALE = locale_id
 
 def find_windows_LCID(locale_id):
  try:
