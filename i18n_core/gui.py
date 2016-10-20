@@ -18,13 +18,18 @@ def set_wx_locale(locale_path, domain, locale_id):
  return wx_locale
 
 def find_wx_lang(locale_id):
- locale_id = locale_id.split('.')[0]
+ original_locale_id = locale_id
  wx_lang = wx.Locale.FindLanguageInfo(locale_id)
  if wx_lang is not None:
   logger.debug("Perfect match: Found wx locale for %s" % locale_id)
-  return wx_lang
- locale_id = locale_id.split('_')[0]
- wx_lang = wx.Locale.FindLanguageInfo(locale_id)
- if wx_lang is not None:
-  logger.warn("Secondary fallback: Found wx locale for %s" % locale_id)
-  return wx_lang
+ else:
+  locale_id = locale_id.split('.')[0]
+  wx_lang = wx.Locale.FindLanguageInfo(locale_id)
+  locale_id = locale_id.split('_')[0]
+  wx_lang = wx.Locale.FindLanguageInfo(locale_id)
+  if wx_lang is not None:
+   logger.warn("Secondary fallback: Found wx locale for %s" % locale_id)
+  else:
+   logger.error("No wx language for %s found" % original_locale_id)
+   return
+ return wx_lang
