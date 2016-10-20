@@ -26,7 +26,6 @@ from babel import support
 import babel.localedata
 if paths.is_frozen():
  babel.localedata._dirname = os.path.join(paths.embedded_data_path(), 'locale-data')
-import gui
 
 DEFAULT_LOCALE = 'en_US'
 CURRENT_LOCALE = DEFAULT_LOCALE
