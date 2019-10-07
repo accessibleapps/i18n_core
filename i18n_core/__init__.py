@@ -193,6 +193,7 @@ def set_locale(locale_id):
 
 def find_windows_LCID(locale_id):
     """
+    Find the windows LCID for the given locale identifier
 
     Args:
       locale_id: 
@@ -200,10 +201,6 @@ def find_windows_LCID(locale_id):
     Returns:
 
     """
-    try:
-        str
-    except NameError:
-        str = str
     # Windows > Vista is able to convert locale names to LCIDs
     func_LocaleNameToLCID = getattr(ctypes.windll.kernel32, "LocaleNameToLCID", None)
     if func_LocaleNameToLCID is not None:
