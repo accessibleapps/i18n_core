@@ -5,9 +5,9 @@ logger = getLogger("i18n_core")
 logger.addHandler(NullHandler())
 
 try:
-    import builtins
-except ImportError:
     import __builtin__ as builtins
+except ImportError:
+    import builtins
 import ctypes
 import datetime
 import locale
