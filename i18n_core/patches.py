@@ -1,4 +1,5 @@
 from platform_utils import paths
+import os
 import pickle
 
 if paths.is_frozen():
