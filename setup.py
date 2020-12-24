@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = 0.37
+__version__ = 0.38
 __doc__ = """Internationalization and localization setup and support utilities."""
 
 with open('README.md', 'rt') as f:
