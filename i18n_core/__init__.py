@@ -1,4 +1,14 @@
 from __future__ import absolute_import
+from platform_utils import paths
+from babel import support
+import babel.core
+from . import patches
+import sys
+import platform
+import os
+import locale
+import datetime
+import ctypes
 from logging import getLogger, NullHandler
 
 logger = getLogger("i18n_core")
@@ -8,18 +18,7 @@ try:
     import __builtin__ as builtins
 except ImportError:
     import builtins
-import ctypes
-import datetime
-import locale
-import os
-import platform
-import sys
 
-from . import patches
-
-import babel.core
-from babel import support
-from platform_utils import paths
 
 DEFAULT_LOCALE = "en_US"
 CURRENT_LOCALE = DEFAULT_LOCALE
@@ -43,14 +42,17 @@ def install_global_translation(domain, locale_id=None, locale_path=None):
     global application_locale_path
     if locale_id is None:
         locale_id = get_system_locale()
-    new_translation = support.Translations.load(locale_path, [locale_id], domain)
+    new_translation = support.Translations.load(
+        locale_path, [locale_id], domain)
     active_translation.merge(new_translation)
     active_translation.install()
     install_translation_into_module()
     set_locale(locale_id)
-    active_translation.set_output_charset(locale.getlocale()[1])
+    if hasattr(active_translation, 'set_output_charset'):
+        active_translation.set_output_charset(locale.getlocale()[1])
     application_locale_path = locale_path
-    logger.info("Installed translation %s for application %s", locale_id, domain)
+    logger.info("Installed translation %s for application %s",
+                locale_id, domain)
     return locale_id
 
 
@@ -79,7 +81,8 @@ def install_module_translation(
         locale_path = get_locale_path(module)
     if locale_id is None:
         locale_id = CURRENT_LOCALE
-    module_translation = support.Translations.load(locale_path, [locale_id], domain)
+    module_translation = support.Translations.load(
+        locale_path, [locale_id], domain)
     active_translation.merge(module_translation)
     logger.debug(
         "Installed translation %s for domain %s into module %r",
@@ -105,11 +108,20 @@ def install_translation_into_module(module=builtins):
         Returns:
 
         """
-        return support.LazyProxy(lambda: active_translation.ugettext(string))
+        # Use gettext for Python 3 compatibility (ugettext was removed)
+        gettext_func = getattr(
+            active_translation, 'gettext', active_translation.ugettext)
+        return support.LazyProxy(lambda: gettext_func(string))
 
-    module._ = active_translation.ugettext
+    # Use gettext for Python 3 compatibility (ugettext was removed)
+    gettext_func = getattr(active_translation, 'gettext',
+                           active_translation.ugettext)
+    ngettext_func = getattr(active_translation, 'ngettext',
+                            active_translation.ungettext)
+
+    module._ = gettext_func
     module.__ = lazy_gettext
-    module.ngettext = lambda s1, s2, n: active_translation.ungettext(s1, s2, n)
+    module.ngettext = lambda s1, s2, n: ngettext_func(s1, s2, n)
 
 
 MAC_LOCALES = {"0:0": "en_GB.utf-8", "0:3": "de_DE.utf-8"}
@@ -180,7 +192,8 @@ def set_locale(locale_id):
         try:
             current_locale = locale.setlocale(locale.LC_ALL, locale_id)
         except locale.Error:
-            current_locale = locale.setlocale(locale.LC_ALL, locale_id.split("_")[0])
+            current_locale = locale.setlocale(
+                locale.LC_ALL, locale_id.split("_")[0])
     except locale.Error:
         current_locale = locale.setlocale(locale.LC_ALL, "")
         logger.warning("Set to default locale %s", current_locale)
@@ -202,7 +215,8 @@ def find_windows_LCID(locale_id):
 
     """
     # Windows > Vista is able to convert locale names to LCIDs
-    func_LocaleNameToLCID = getattr(ctypes.windll.kernel32, "LocaleNameToLCID", None)
+    func_LocaleNameToLCID = getattr(
+        ctypes.windll.kernel32, "LocaleNameToLCID", None)
     if func_LocaleNameToLCID is not None:
         locale_id = locale_id.replace("_", "-")
         LCID = func_LocaleNameToLCID(str(locale_id), 0)
@@ -210,7 +224,8 @@ def find_windows_LCID(locale_id):
         locale_id = locale.normalize(locale_id)
         if "." in locale_id:
             locale_id = locale_id.split(".")[0]
-        LCList = [x[0] for x in locale.windows_locale.items() if x[1] == locale_id]
+        LCList = [x[0]
+                  for x in locale.windows_locale.items() if x[1] == locale_id]
         if LCList:
             LCID = LCList[0]
         else:
@@ -268,7 +283,8 @@ def get_available_translations(domain, locale_path=None):
         locale_path = application_locale_path
     for directory in os.listdir(locale_path):
         if os.path.exists(
-            os.path.join(locale_path, directory, "lc_messages", "%s.mo" % domain)
+            os.path.join(locale_path, directory,
+                         "lc_messages", "%s.mo" % domain)
         ):
             yield directory
     yield DEFAULT_LOCALE
