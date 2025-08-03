@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "i18n_core"
+version = "1.4.0"
+description = "Internationalization and localization setup and support utilities."
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Christopher Toth", email = "q@q-continuum.net"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers", 
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "babel",
+    "platform_utils",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "build",
+    "twine",
+]
+
+[tool.setuptools]
+packages = ["i18n_core"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md"]
+
+[tool.wheel]
+universal = true
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=6.0",
+    "build>=0.7",
+    "twine>=3.0",
+]
+
+[tool.uv.sources]

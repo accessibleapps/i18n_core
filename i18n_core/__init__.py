@@ -1,15 +1,16 @@
 from __future__ import absolute_import
-from platform_utils import paths
-from babel import support
-import babel.core
-from . import patches
-import sys
-import platform
-import os
-import locale
-import datetime
+
 import ctypes
-from logging import getLogger, NullHandler
+import datetime
+import locale
+import os
+import platform
+import sys
+from logging import NullHandler, getLogger
+
+import babel.core
+from babel import support
+from platform_utils import paths
 
 logger = getLogger("i18n_core")
 logger.addHandler(NullHandler())
@@ -25,6 +26,10 @@ CURRENT_LOCALE = DEFAULT_LOCALE
 
 active_translation = support.Translations()
 application_locale_path = None
+
+
+def patch():
+    from . import patches
 
 
 def install_global_translation(domain, locale_id=None, locale_path=None):

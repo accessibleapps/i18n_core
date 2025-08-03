@@ -4,3 +4,12 @@
 *.diff
 
 docs/_build
+
+# uv
+uv.lock
+.uv/
+
+# Modern Python packaging
+dist/
+build/
+*.egg-info/
