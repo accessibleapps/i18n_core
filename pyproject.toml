@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "i18n_core"
@@ -28,15 +28,6 @@ dev = [
     "build",
     "twine",
 ]
-
-[tool.setuptools]
-packages = ["i18n_core"]
-
-[tool.setuptools.package-data]
-"*" = ["*.txt", "*.md"]
-
-[tool.wheel]
-universal = true
 
 [tool.uv]
 dev-dependencies = [
