@@ -75,8 +75,15 @@ def install_module_translation(
     Returns:
 
     """
-    if module in sys.modules:
+    # Handle string module names
+    if isinstance(module, str):
         module = sys.modules[module]
+    elif module is None:
+        # Get the calling module when none specified
+        import inspect
+        frame = inspect.currentframe().f_back
+        module = inspect.getmodule(frame)
+    
     if active_translation is None:
         logger.warning(
             "Cannot install module translation if there is no global translation active"
