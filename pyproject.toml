@@ -18,7 +18,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "babel",
+    "babel>=2.15,<3.0",
     "platform_utils",
 ]
 
