@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "i18n_core"
-version = "1.5.3"
+version = "2.0.0"
 description = "Internationalization and localization setup and support utilities."
 readme = "README.md"
 license = "MIT"
