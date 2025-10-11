@@ -25,6 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pyright",
     "build",
     "twine",
 ]
@@ -32,8 +33,18 @@ dev = [
 [tool.uv]
 dev-dependencies = [
     "pytest>=6.0",
+    "pyright>=1.1.0",
     "build>=0.7",
     "twine>=3.0",
 ]
 
 [tool.uv.sources]
+
+[tool.pyright]
+include = ["i18n_core", "tests"]
+exclude = [".venv", "dist", "build", ".pytest_cache", ".git", "__pycache__"]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+pythonVersion = "3.8"
