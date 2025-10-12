@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-
+import builtins
 import ctypes
 import datetime
 import locale
@@ -8,7 +7,7 @@ import platform
 import sys
 from logging import getLogger
 from types import ModuleType
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Iterable, Optional
 
 import babel.core
 from babel import support
@@ -24,13 +23,6 @@ from .registry import (
 
 logger = getLogger("i18n_core")
 
-
-try:
-    import __builtin__ as builtins
-except ImportError:
-    import builtins
-
-
 CURRENT_LOCALE: str = DEFAULT_LOCALE
 
 # Back-compat placeholder; dynamically computed from default domain
@@ -39,12 +31,13 @@ application_locale_path: Optional[str] = None
 
 
 def patch() -> None:
-    from . import patches
+    from . import patches  # noqa: F401
 
 
 # ---------------------------
 # Core dynamic translation API
 # ---------------------------
+
 
 def _get_translator_for_domain(domain: str) -> support.NullTranslations:
     return REGISTRY.get_domain_translations(domain)
@@ -65,13 +58,22 @@ def _resolve_domain_for_call() -> str:
     module_obj = sys.modules.get(mod_name)
     mod_file = getattr(module_obj, "__file__", None)
     domain = ensure_inferred_provider(mod_name, mod_file)
+    if domain is None:
+        raise RuntimeError("Failed to infer domain for module %s" % mod_name)
     # If we have no providers for the inferred domain, fall back to default
     if not REGISTRY.providers_for(domain):
         fallback = REGISTRY.get_default_domain() or domain
-        logger.debug("i18n: resolve domain: caller=%s inferred=%s providers=0 fallback=%s", mod_name, domain, fallback)
+        logger.debug(
+            "i18n: resolve domain: caller=%s inferred=%s providers=0 fallback=%s",
+            mod_name,
+            domain,
+            fallback,
+        )
         return fallback
     logger.debug("i18n: resolve domain: caller=%s inferred=%s", mod_name, domain)
-    return domain or (REGISTRY.get_default_domain() or infer_domain_from_module(mod_name))
+    return domain or (
+        REGISTRY.get_default_domain() or infer_domain_from_module(mod_name)
+    )
 
 
 def _dynamic_gettext(message: str) -> str:
@@ -101,7 +103,9 @@ def _dynamic_lazy_gettext(message: str) -> support.LazyProxy:
         return support.LazyProxy(lambda: _dynamic_gettext(message))
 
 
-def install_translation_into_module(module: ModuleType = builtins, domain: Optional[str] = None) -> None:
+def install_translation_into_module(
+    module: ModuleType = builtins, domain: Optional[str] = None
+) -> None:
     """Install dynamic translation functions into a module.
 
     The installed functions resolve translations at call time and reflect
@@ -117,7 +121,11 @@ def install_translation_into_module(module: ModuleType = builtins, domain: Optio
             # ensure an inferred provider exists so lookups work without explicit registration
             mod_file = getattr(module, "__file__", None)
             ensure_inferred_provider(mod_name, mod_file)
-    logger.debug("i18n: installing wrappers into module=%s domain=%s", getattr(module, "__name__", None), bound_domain)
+    logger.debug(
+        "i18n: installing wrappers into module=%s domain=%s",
+        getattr(module, "__name__", None),
+        bound_domain,
+    )
 
     def _mod_gettext(msg: str) -> str:
         d = bound_domain or _resolve_domain_for_call()
@@ -137,9 +145,9 @@ def install_translation_into_module(module: ModuleType = builtins, domain: Optio
         except TypeError:
             return support.LazyProxy(lambda: _mod_gettext(msg))
 
-    module._ = _mod_gettext
-    module.__ = _mod_lazy
-    module.ngettext = _mod_ngettext
+    module._ = _mod_gettext  # type: ignore
+    module.__ = _mod_lazy  # type: ignore
+    module.ngettext = _mod_ngettext  # type: ignore
 
 
 MAC_LOCALES = {"0:0": "en_GB.utf-8", "0:3": "de_DE.utf-8"}
@@ -177,7 +185,12 @@ def get_locale_path(module: Optional[ModuleType] = None) -> str:
 
     """
     if not paths.is_frozen():
-        return os.path.join(os.path.split(module.__file__)[0], "locale")
+        if module is None:
+            module_name = get_calling_module_name() or __name__
+            module = sys.modules.get(module_name)
+        if module is not None and hasattr(module, "__file__") and module.__file__:
+            module_file = module.__file__
+            return os.path.join(os.path.split(module_file)[0], "locale")
     return os.path.join(paths.embedded_data_path(), "locale")
 
 
@@ -273,7 +286,9 @@ def locale_from_locale_id(locale_id: str) -> babel.core.Locale:
     return babel.core.Locale(language, region)
 
 
-def get_available_locales(domain: str, locale_path: Optional[str] = None) -> Iterable[babel.core.Locale]:
+def get_available_locales(
+    domain: str, locale_path: Optional[str] = None
+) -> Iterable[babel.core.Locale]:
     """
 
     Args:
@@ -289,12 +304,16 @@ def get_available_locales(domain: str, locale_path: Optional[str] = None) -> Ite
             yield locale_from_locale_id(translation_dir)
         except babel.core.UnknownLocaleError:
             logger.warning(
-                "Error retrieving locale for translation %r", translation_dir
+                "Error retrieving locale for translation %r with domain %r",
+                translation_dir,
+                domain,
             )
             continue
 
 
-def get_available_translations(domain: str, locale_path: Optional[str] = None) -> Iterable[str]:
+def get_available_translations(
+    domain: str, locale_path: Optional[str] = None
+) -> Iterable[str]:
     """
 
     Args:
@@ -304,7 +323,7 @@ def get_available_translations(domain: str, locale_path: Optional[str] = None) -
     Returns:
 
     """
-    paths_to_scan = []
+    paths_to_scan: list[str] = []
     if locale_path is not None:
         paths_to_scan.append(locale_path)
     else:
@@ -315,7 +334,7 @@ def get_available_translations(domain: str, locale_path: Optional[str] = None) -
         # also include last application locale path for backward-compat
         if application_locale_path and application_locale_path not in paths_to_scan:
             paths_to_scan.append(application_locale_path)
-    seen = set()
+    seen: set[str] = set()
     for base in paths_to_scan:
         if not base or not os.path.isdir(base):
             continue
@@ -330,7 +349,12 @@ def get_available_translations(domain: str, locale_path: Optional[str] = None) -
             lc_dir_lower = os.path.join(base, directory, "lc_messages", f"{domain}.mo")
             if os.path.exists(lc_dir) or os.path.exists(lc_dir_lower):
                 seen.add(directory)
-                logger.debug("i18n: found available translation: domain=%s locale=%s in %s", domain, directory, base)
+                logger.debug(
+                    "i18n: found available translation: domain=%s locale=%s in %s",
+                    domain,
+                    directory,
+                    base,
+                )
                 yield directory
     # Always include a default fallback
     if DEFAULT_LOCALE not in seen:
@@ -358,6 +382,7 @@ def format_timestamp(timestamp: Any) -> str:
 # New public API
 # ---------------------------
 
+
 def finalize_i18n(
     locale_id: Optional[str] = None,
     languages: Optional[Iterable[str]] = None,
@@ -367,7 +392,9 @@ def finalize_i18n(
     priority: int = 100,
 ) -> str:
     if app_domain and app_locale_path:
-        REGISTRY.register_domain(app_domain, app_locale_path, priority=priority, source="finalize_i18n")
+        REGISTRY.register_domain(
+            app_domain, app_locale_path, priority=priority, source="finalize_i18n"
+        )
         REGISTRY.set_default_domain(app_domain)
         global application_locale_path
         application_locale_path = app_locale_path
@@ -381,7 +408,9 @@ def finalize_i18n(
     return final_locale
 
 
-def install_global_translation(domain: str, locale_id: Optional[str] = None, locale_path: Optional[str] = None) -> str:
+def install_global_translation(
+    domain: str, locale_id: Optional[str] = None, locale_path: Optional[str] = None
+) -> str:
     """Register a global/default application translation.
 
     Backward-compatible shim: registers the domain provider, installs builtins
@@ -393,7 +422,12 @@ def install_global_translation(domain: str, locale_id: Optional[str] = None, loc
         mod = sys.modules.get(mod_name)
         if mod is not None and hasattr(mod, "__file__"):
             locale_path = get_locale_path(mod)
-    REGISTRY.register_domain(domain, os.fspath(locale_path) if locale_path else "", priority=100, source="install_global_translation")
+    REGISTRY.register_domain(
+        domain,
+        os.fspath(locale_path) if locale_path else "",
+        priority=100,
+        source="install_global_translation",
+    )
     REGISTRY.set_default_domain(domain)
     install_translation_into_module(builtins, domain=domain)
     global application_locale_path
@@ -435,13 +469,22 @@ def install_module_translation(
     if locale_path is None:
         locale_path = get_locale_path(module)
     # Register provider and module-domain mapping
-    REGISTRY.register_domain(domain, locale_path, priority=priority, source=module.__name__)
+    REGISTRY.register_domain(
+        domain, locale_path, priority=priority, source=module.__name__
+    )
     REGISTRY.set_module_domain(module.__name__, domain)
     install_translation_into_module(module, domain=domain)
     if locale_id is None:
-        logger.debug("No locale ID specified, falling back to current locale %s", CURRENT_LOCALE)
+        logger.debug(
+            "No locale ID specified, falling back to current locale %s", CURRENT_LOCALE
+        )
         locale_id = CURRENT_LOCALE
-    logger.debug("Installed translation %s for domain %s into module %r", locale_id, domain, module)
+    logger.debug(
+        "Installed translation %s for domain %s into module %r",
+        locale_id,
+        domain,
+        module,
+    )
     return None
 
 
