@@ -103,6 +103,11 @@ def _dynamic_lazy_gettext(message: str) -> support.LazyProxy:
         return support.LazyProxy(lambda: _dynamic_gettext(message))
 
 
+_ = _dynamic_gettext
+__ = _dynamic_lazy_gettext
+ngettext = _dynamic_ngettext
+
+
 def install_translation_into_module(
     module: ModuleType = builtins, domain: Optional[str] = None
 ) -> None:
