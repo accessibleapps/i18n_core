@@ -17,6 +17,9 @@ Repair the actual failures on fresh master before updating feature PR #3. Keep r
 - Broken fixture: generated PO bytes had CRLF inside quoted fields (first field ends with hex 74 65 73 74 0d 0a 22), causing GNU msgfmt 0.22.5 to report end-of-line within string and 16 fatal errors.
 - Product defect exposed after compiling valid catalogs: all four tests raised ImportError for the README's documented `from i18n_core import _`. Existing _dynamic_gettext/_dynamic_lazy_gettext/_dynamic_ngettext implement the behavior; aliases preserve those implementations.
 - Broken test setup exposed after restoring exports: availability returned only en_US because its comment promised an implicit-registration call but the test only imported foo. Calling foo.get_text() executes the existing inference path; both existing locale assertions remain.
+- Coordinator authorized the missing hosted gate: one Ubuntu/Python 3.13 job runs the full existing suite and package build on PRs and master pushes. Install GNU gettext and require `msgfmt --version` before pytest so the module cannot silently skip for an absent compiler. No release workflow changes.
+- CI uses uv 0.8.8, matching local verification; no tracked lock exists and the repository ignores uv.lock, so retain the existing `uv run pytest` resolution contract rather than invent a committed lock. Existing pytest/dev tools are already declared; no dependency or support-floor change.
+- Official GitHub tag APIs verified actions/checkout v7.0.1 = 3d3c42e5aac5ba805825da76410c181273ba90b1 and astral-sh/setup-uv v9.0.0 = c771a70e6277c0a99b617c7a806ffedaca235ff9. Add github-actions to existing Dependabot configuration to maintain pins. Read-only contents permission, nonpersisted checkout credentials, disabled uv cache, ten-minute timeout, ref-specific supersession cancellation.
 
 ## Verification
 
@@ -29,6 +32,8 @@ Repair the actual failures on fresh master before updating feature PR #3. Keep r
 - Windows CPython 3.13.15, pytest 9.1.1, GNU gettext 0.22.5. Full suite exercises its existing locale calls; no separate GUI/native service journey was performed.
 - Manifest unchanged. uv.lock was absent and untracked initially, generated locally, remains ignored, SHA256 63723D3F8FC99256FC72FA5FEAE83D4A34AED1E9F7C42FC89451194908BABF44. No tracked lock diff.
 - Complete source/test diff inspected, git diff --check passes. No credentials/private data in authored code. Canonical status and feature PR head rechecked unchanged.
+- `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -no-color .github/workflows/ci.yml`: exit 0, no diagnostics.
+- `uvx zizmor==1.31.1 --offline .github/workflows/ci.yml`: exit 0, no findings. Only the authored workflow audited; old publishing workflow remains unchanged.
 
 ## Surprises
 
@@ -36,4 +41,4 @@ The malformed headers hid two independent baseline issues. The documented public
 
 ## Next step
 
-Commit only the two repaired files and this note locally. Coordinator reviews the exact patch before authorizing publication. Actual Claude review and relevant hosted green checks are still required on the final proposed head; master currently has only a tag-triggered publishing workflow. Do not rewrite feature #3 until the coordinator authorizes it after prerequisite landing.
+Local repair commit b6d5c46f3cab6fdbcef1c1d53f499211e437bb7b contains the two repaired files and this note. The following CI commit contains the authorized CI/Dependabot additions and this updated living note. Local work is complete and the worktree is clean. Coordinator reviews the complete exact patch before authorizing publication. Actual Claude review and hosted green checks are still pending on the final proposed head. Do not rewrite feature #3 until the coordinator authorizes it after prerequisite landing.
