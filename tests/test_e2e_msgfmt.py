@@ -25,14 +25,14 @@ def build_mo(locale_root: os.PathLike, domain: str, locale: str, entries: dict) 
         f"""
         msgid ""
         msgstr ""
-        "Project-Id-Version: test\n"
-        "POT-Creation-Date: 2024-01-01 00:00+0000\n"
-        "PO-Revision-Date: 2024-01-01 00:00+0000\n"
-        "Language: {locale}\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=UTF-8\n"
-        "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=2; plural=(n != 1);\n"\n
+        "Project-Id-Version: test\\n"
+        "POT-Creation-Date: 2024-01-01 00:00+0000\\n"
+        "PO-Revision-Date: 2024-01-01 00:00+0000\\n"
+        "Language: {locale}\\n"
+        "MIME-Version: 1.0\\n"
+        "Content-Type: text/plain; charset=UTF-8\\n"
+        "Content-Transfer-Encoding: 8bit\\n"
+        "Plural-Forms: nplurals=2; plural=(n != 1);\\n"\n
         """
     )
     body_lines = [header]
@@ -130,7 +130,8 @@ def test_available_translations_lists_locales(tmp_path):
     build_mo(locale_root, "libC", "de_DE", {"Hello": "C-DE"})
 
     # Register implicitly by importing and calling _ once
-    from libC import foo  # noqa: F401
+    from libC import foo
+    foo.get_text()
     locs = list(i18n_core.get_available_translations("libC"))
     assert "en_US" in locs
     assert "de_DE" in locs
