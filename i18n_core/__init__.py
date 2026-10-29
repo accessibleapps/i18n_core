@@ -464,7 +464,7 @@ def install_module_translation(
         import inspect
 
         frame = inspect.currentframe().f_back
-        module = inspect.getmodule(frame)
+        module = sys.modules.get(frame.f_globals.get("__name__", ""))
 
     if module is None:
         logger.warning("install_module_translation called without resolvable module")

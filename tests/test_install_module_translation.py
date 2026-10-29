@@ -33,17 +33,15 @@ class TestInstallModuleTranslation:
     def test_module_none_uses_calling_module(self):
         with patch("i18n_core.get_locale_path") as mock_get_path, \
             patch("inspect.currentframe") as mock_frame, \
-            patch("inspect.getmodule") as mock_getmodule, \
+            patch.dict(sys.modules, {"test_module.unit": self.mock_module}), \
             patch.object(i18n_core, "REGISTRY") as mock_reg:
 
             frame_obj = Mock()
-            frame_obj.f_back = Mock()
+            frame_obj.f_back = SimpleNamespace(f_globals={"__name__": "test_module.unit"})
             mock_frame.return_value = frame_obj
-            mock_getmodule.return_value = self.mock_module
             mock_get_path.return_value = "/fake/locale"
 
             i18n_core.install_module_translation(domain="test_domain", module=None)
-            mock_getmodule.assert_called_once_with(frame_obj.f_back)
             mock_get_path.assert_called_once_with(self.mock_module)
             mock_reg.register_domain.assert_called_once()
 
